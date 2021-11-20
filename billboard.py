@@ -1,5 +1,4 @@
 import requests
-import os
 import webbrowser
 from bs4 import BeautifulSoup
 from tkinter import *
@@ -7,7 +6,7 @@ from tkinter import *
 win = Tk()
 
 win.iconbitmap('./icon.ico')
-win.geometry("1000x500")
+win.geometry("1000x1000")
 win.title("Billboard")
 
 sb = Scrollbar(win, orient=VERTICAL)
@@ -22,20 +21,20 @@ headers = {
 
 URL = "https://www.billboard.com/charts/hot-100"
 
-result = requests.get(URL)
+result = requests.get(URL, headers=headers)
 soup = BeautifulSoup(result.text, "html.parser")
-songs = soup.find_all("button", {"class": "chart-element__wrapper"})
+songs = soup.find_all("div", {"class": "o-chart-results-list-row-container"})
 weekend = soup.find(
-    "button", {"class": "date-selector__button button--link"}).get_text()
+    "p", {"class": "a-font-primary-medium-xs"}).get_text()
 
 
 def extract_song(html):
     rank = html.find(
-        "span", {"class": "chart-element__rank__number"}).get_text()
+        "span", {"class": "a-font-primary-bold-l"}).get_text()
     title = html.find(
-        "span", {"class": "chart-element__information__song"}).get_text()
+        "h3", {"class": "c-title"}).get_text()
     artist = html.find(
-        "span", {"class": "chart-element__information__artist"}).get_text()
+        "span", {"class": "a-font-primary-s"}).get_text()
     searchTitle = title.replace(" ", "+")
     searchArtist = artist.replace(" ", "+")
     link = f"https://www.youtube.com/results?search_query={searchTitle}+{searchArtist}"
@@ -52,7 +51,7 @@ def extract_songs():
     for song in songs:
         songsInfo = extract_song(song)
         songsInfos.append(songsInfo)
-    lb.insert(END, weekend)
+    lb.insert(END, weekend, "")
     for songInfo in songsInfos:
         lb.insert(END, f"Rank {songInfo['rank']}", songInfo['title'],
                   songInfo['artist'], songInfo['link'], "")
